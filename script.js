@@ -1,3 +1,13 @@
+/* ══════════════════════════════════════════════════════════════
+   SCIENCELAB — COMPLETE SCRIPT  v2.0
+   MIT-Level AI · Groq + OpenRouter fallback chain
+   Developer: Kabya Saha
+══════════════════════════════════════════════════════════════ */
+
+/* ── API KEYS ─────────────────────────────────────────────── */
+const GROQ_KEY       = "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";
+const OPENROUTER_KEY = "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";
+
 /* ══════════════════════════════════
    ELEMENT DATA (all 118)
 ══════════════════════════════════ */
@@ -125,28 +135,192 @@ const EL=[
 const MM={H:1.008,He:4.003,Li:6.94,Be:9.012,B:10.81,C:12.011,N:14.007,O:15.999,F:18.998,Ne:20.18,Na:22.99,Mg:24.305,Al:26.982,Si:28.085,P:30.974,S:32.06,Cl:35.45,Ar:39.948,K:39.098,Ca:40.078,Fe:55.845,Cu:63.546,Zn:65.38,Ag:107.868,Au:196.967,Hg:200.592,Pb:207.2,Sn:118.71,Mn:54.938,Cr:51.996,Co:58.933,Ni:58.693,Mo:95.95,Br:79.904,I:126.904,Ba:137.327,Sr:87.62};
 
 /* ══════════════════════════════════
+   MIT-LEVEL SYSTEM PROMPTS
+══════════════════════════════════ */
+const AI_SYSTEMS = {
+  math: `You are a world-class mathematician at MIT/Harvard PhD level.
+ABSOLUTE RULES:
+- ZERO filler. No greetings, no "Great question!", no sign-offs. Solve immediately.
+- Be CONCISE and RIGOROUS. Every sentence must carry information.
+- Format ALWAYS: **Method:** [theorem/technique] → numbered steps → **Answer: [result]**
+- Plain text math: / for fractions, ^ for powers, sqrt() for roots, d/dx for derivatives, ∫ for integrals, Σ for sums.
+- Symbols: ∈ ∉ ⊆ ∩ ∪ ∀ ∃ ⇒ ⟺ ℝ ℤ ℚ ℂ ℕ ∞ ∂ ∇ Δ π α β γ λ θ φ σ ω ≤ ≥ ≠ ≈
+- Proofs: rigorous logical structure (Given → Claim → Proof → QED).
+- Integrals: state method (substitution/parts/partial fractions) then all steps.
+- Series/limits: explicitly state the convergence test or theorem used.
+- ODEs/PDEs: general solution first → apply boundary/initial conditions.
+- Linear algebra: show row ops or eigenvalue computation in full.
+SCOPE: arithmetic to research-level — calculus, real/complex analysis, ODEs/PDEs, linear algebra, abstract algebra, number theory, combinatorics, probability & statistics, topology, differential geometry, functional analysis, optimization, competition math (IMO/Putnam level).`,
+
+  phys: `You are a world-class physicist at MIT/Caltech PhD level.
+ABSOLUTE RULES:
+- ZERO filler. No greetings. Solve immediately.
+- Format ALWAYS: **Principle:** [law/equation] → numbered steps → **Answer: [value + units]**
+- Units on EVERY result. Dimensional analysis on non-trivial answers.
+- State reference frame for mechanics/relativity. Coordinate system for vector problems.
+- Show ALL algebraic substitutions — no skipped steps.
+CONSTANTS: c=3×10^8 m/s | h=6.626×10^-34 J·s | ℏ=1.055×10^-34 J·s | G=6.674×10^-11 N·m²/kg² | kB=1.381×10^-23 J/K | e=1.602×10^-19 C | me=9.109×10^-31 kg | ε0=8.854×10^-12 F/m | NA=6.022×10^23 mol⁻¹ | R=8.314 J/(mol·K) | g=9.81 m/s²
+SCOPE: classical mechanics (Newtonian/Lagrangian/Hamiltonian), E&M (Maxwell, circuits), thermodynamics & stat mech, quantum mechanics (Schrödinger, perturbation theory, spin), relativity, optics, fluid dynamics, nuclear & particle physics, astrophysics.`,
+
+  chem: `You are a world-class chemist at MIT/Caltech PhD level.
+ABSOLUTE RULES:
+- ZERO filler. No greetings. Solve immediately.
+- Format ALWAYS: **Approach:** [method] → numbered steps → **Answer: [value + units]**
+- Units always. Sig figs match given data.
+- Equations: H2O for subscripts, → reactions, ⇌ equilibrium, Δ heat.
+KEY EQUATIONS: ΔG=ΔH-TΔS | ΔG°=-RT·ln(K) | pH=-log[H+] | pH=pKa+log([A-]/[HA]) | E=E°-(RT/nF)·ln(Q) | k=A·e^(-Ea/RT) | A=εlc | PV=nRT
+SCOPE: stoichiometry, equilibrium (ICE tables), acid-base (polyprotic, buffers, titrations), thermodynamics (Hess's law), kinetics (rate laws, Arrhenius, mechanisms), electrochemistry (Nernst), quantum chemistry, organic chemistry (all mechanisms, synthesis, NMR/IR/MS), coordination chemistry, nuclear chemistry.`
+};
+
+/* ══════════════════════════════════
+   PROVIDER CHAIN
+══════════════════════════════════ */
+const PROVIDERS = [
+  {
+    name:"Groq · Llama-3.3-70B",
+    async call(sys,q){
+      const r=await fetch("https://api.groq.com/openai/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":`Bearer ${GROQ_KEY}`},body:JSON.stringify({model:"llama-3.3-70b-versatile",messages:[{role:"system",content:sys},{role:"user",content:q}],temperature:0.2,max_tokens:1024})});
+      if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e?.error?.message||`Groq ${r.status}`);}
+      const d=await r.json();return d.choices?.[0]?.message?.content||"";
+    }
+  },
+  {
+    name:"Groq · DeepSeek-R1-70B",
+    async call(sys,q){
+      const r=await fetch("https://api.groq.com/openai/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":`Bearer ${GROQ_KEY}`},body:JSON.stringify({model:"deepseek-r1-distill-llama-70b",messages:[{role:"system",content:sys},{role:"user",content:q}],temperature:0.1,max_tokens:1024})});
+      if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e?.error?.message||`Groq-R1 ${r.status}`);}
+      const d=await r.json();return d.choices?.[0]?.message?.content||"";
+    }
+  },
+  {
+    name:"OpenRouter · DeepSeek-R1 Full",
+    async call(sys,q){
+      const r=await fetch("https://openrouter.ai/api/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":`Bearer ${OPENROUTER_KEY}`,"HTTP-Referer":window.location.origin,"X-Title":"ScienceLab"},body:JSON.stringify({model:"deepseek/deepseek-r1:free",messages:[{role:"system",content:sys},{role:"user",content:q}],temperature:0.1,max_tokens:1024})});
+      if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e?.error?.message||`OR-R1 ${r.status}`);}
+      const d=await r.json();return d.choices?.[0]?.message?.content||"";
+    }
+  },
+  {
+    name:"OpenRouter · Llama-3.3-70B",
+    async call(sys,q){
+      const r=await fetch("https://openrouter.ai/api/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":`Bearer ${OPENROUTER_KEY}`,"HTTP-Referer":window.location.origin,"X-Title":"ScienceLab"},body:JSON.stringify({model:"meta-llama/llama-3.3-70b-instruct:free",messages:[{role:"system",content:sys},{role:"user",content:q}],temperature:0.2,max_tokens:1024})});
+      if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e?.error?.message||`OR-Llama ${r.status}`);}
+      const d=await r.json();return d.choices?.[0]?.message?.content||"";
+    }
+  }
+];
+
+/* ══════════════════════════════════
+   CORE AI CALL — auto-fallback
+══════════════════════════════════ */
+async function callAI(subject,question){
+  const sys=AI_SYSTEMS[subject];
+  for(const p of PROVIDERS){
+    try{
+      const raw=await p.call(sys,question);
+      const out=cleanAIResponse(raw);
+      if(out&&out.length>10){console.info(`✅ solved via ${p.name}`);return out;}
+    }catch(e){console.warn(`⚠️ ${p.name} failed:`,e.message);}
+  }
+  throw new Error("All AI providers failed.\n\nCheck your internet connection.\nGroq key: console.groq.com\nOpenRouter key: openrouter.ai/keys");
+}
+
+function cleanAIResponse(t){
+  if(!t)return"";
+  t=t.replace(/<think>[\s\S]*?<\/think>/gi,"").trim();
+  t=t.replace(/<thinking>[\s\S]*?<\/thinking>/gi,"").trim();
+  t=t.replace(/---[\s\S]*?[Ss]upport[\s\S]*?---/g,"");
+  t=t.replace(/[Pp]owered by[^\n]*/g,"");
+  t=t.replace(/\n{3,}/g,"\n\n");
+  return t.trim();
+}
+
+/* ══════════════════════════════════
+   MARKDOWN → HTML
+══════════════════════════════════ */
+function mdToHtml(t){
+  const subs=[[/\\frac\{([^}]+)\}\{([^}]+)\}/g,"($1)/($2)"],[/\\sqrt\{([^}]+)\}/g,"√($1)"],[/\\int\b/g,"∫"],[/\\sum\b/g,"∑"],[/\\prod\b/g,"∏"],[/\\infty/g,"∞"],[/\\partial/g,"∂"],[/\\nabla/g,"∇"],[/\\hbar/g,"ℏ"],[/\\rightarrow|\\to\b/g,"→"],[/\\leftarrow/g,"←"],[/\\Rightarrow/g,"⇒"],[/\\Leftrightarrow/g,"⟺"],[/\\leq/g,"≤"],[/\\geq/g,"≥"],[/\\neq/g,"≠"],[/\\approx/g,"≈"],[/\\times/g,"×"],[/\\cdot/g,"·"],[/\\pm/g,"±"],[/\\alpha/g,"α"],[/\\beta/g,"β"],[/\\gamma/g,"γ"],[/\\delta/g,"δ"],[/\\Delta/g,"Δ"],[/\\lambda/g,"λ"],[/\\mu/g,"μ"],[/\\sigma/g,"σ"],[/\\omega/g,"ω"],[/\\Omega/g,"Ω"],[/\\pi/g,"π"],[/\\theta/g,"θ"],[/\\phi/g,"φ"],[/\\psi/g,"ψ"],[/\\rho/g,"ρ"],[/\\epsilon/g,"ε"],[/\\left[\(\[\{]|\\right[\)\]\}]/g,""],[/\\\(|\\\)/g,""],[/\\\[|\\\]/g,""]];
+  subs.forEach(([r,s])=>{try{t=t.replace(r,s);}catch{}});
+  t=t.replace(/\*\*Answer:?\s*([\s\S]+?)\*\*/g,'<div class="ai-answer-box"><span class="ai-answer-label">ANSWER</span><span class="ai-answer-val">$1</span></div>');
+  t=t.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/\*(.+?)\*/g,"<em>$1</em>").replace(/`(.+?)`/g,'<code class="inline-code">$1</code>');
+  t=t.replace(/^#{1,3}\s+(.+)$/gm,'<div class="ai-section-head">$1</div>');
+  t=t.replace(/^(\d+)\.\s+(.+)$/gm,'<div class="ai-step"><span class="ai-step-num">$1</span><span class="ai-step-body">$2</span></div>');
+  t=t.replace(/^[-•]\s+(.+)$/gm,'<div class="ai-bullet">$1</div>');
+  t=t.replace(/\n\n+/g,'<div class="ai-spacer"></div>');
+  t=t.replace(/\n(?![<])/g,"<br>");
+  return t;
+}
+
+/* ══════════════════════════════════
+   ASK AI HANDLER
+══════════════════════════════════ */
+async function askAI(subject){
+  const inp=document.getElementById(subject+'-q');
+  const q=inp.value.trim();
+  if(!q)return;
+  inp.value='';inp.style.height='auto';
+  const think=document.getElementById(subject+'-think');
+  const ans=document.getElementById(subject+'-ans');
+  const err=document.getElementById(subject+'-err');
+  const sbtn=document.getElementById(subject+'-sbtn');
+  err.classList.remove('show');ans.classList.remove('show');
+  think.classList.add('show');sbtn.disabled=true;
+  sbtn.innerHTML=`<svg class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg><span>Solving…</span>`;
+  try{
+    const reply=await callAI(subject,q);
+    think.classList.remove('show');
+    document.getElementById(subject+'-acont').innerHTML=mdToHtml(reply);
+    ans.classList.add('show');
+    ans.scrollIntoView({behavior:'smooth',block:'nearest'});
+    toast('Solution ready!',subject);
+  }catch(e){
+    think.classList.remove('show');
+    document.getElementById(subject+'-emsg').textContent=e.message||'Connection error.';
+    err.classList.add('show');
+  }finally{
+    sbtn.disabled=false;
+    sbtn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg><span>Ask</span>`;
+  }
+}
+
+function copyAns(id){
+  const el=document.getElementById(id);
+  navigator.clipboard.writeText(el.innerText||el.textContent).then(()=>toast('Copied!','chem')).catch(()=>{});
+}
+
+/* ══════════════════════════════════
+   ANSWER BOX STYLES
+══════════════════════════════════ */
+(function(){
+  if(document.getElementById('sl-ai-styles'))return;
+  const s=document.createElement('style');
+  s.id='sl-ai-styles';
+  s.textContent=`
+    .ai-answer-box{display:flex;align-items:flex-start;gap:12px;background:linear-gradient(135deg,var(--acc,#4f8ef7)14,transparent);border:1.5px solid var(--acc,#4f8ef7);border-radius:10px;padding:12px 16px;margin:14px 0 4px}
+    .ai-answer-label{font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--acc,#4f8ef7);white-space:nowrap;padding-top:3px}
+    .ai-answer-val{font-size:15px;font-weight:700;color:var(--fg,#e8eaf6);line-height:1.55}
+    .ai-section-head{font-weight:700;color:var(--acc,#4f8ef7);margin:14px 0 6px;font-size:13px;letter-spacing:.5px;border-bottom:1px solid var(--acc,#4f8ef7)25;padding-bottom:4px}
+    .ai-step{display:flex;gap:10px;align-items:baseline;margin:7px 0;line-height:1.65}
+    .ai-step-num{font-size:10px;font-weight:800;color:var(--acc,#4f8ef7);background:var(--acc,#4f8ef7)20;border-radius:50%;min-width:20px;height:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+    .ai-step-body{flex:1}
+    .ai-bullet{padding-left:18px;margin:5px 0;position:relative;line-height:1.65}
+    .ai-bullet::before{content:'▸';position:absolute;left:2px;color:var(--acc,#4f8ef7);font-size:12px;top:1px}
+    .ai-spacer{height:10px}
+    .inline-code{background:var(--acc,#4f8ef7)18;color:var(--acc,#4f8ef7);padding:1px 6px;border-radius:4px;font-family:'JetBrains Mono','Fira Code',monospace;font-size:.88em}
+  `;
+  (document.head||document.documentElement).appendChild(s);
+})();
+
+/* ══════════════════════════════════
    PERIODIC TABLE
 ══════════════════════════════════ */
 const CATS={alkali:'Alkali Metal',alkaline:'Alkaline Earth',transition:'Transition Metal',post:'Post-Transition',metalloid:'Metalloid',nonmetal:'Nonmetal',noble:'Noble Gas',lanthanide:'Lanthanide',actinide:'Actinide',hydrogen:'Hydrogen'};
 const CAT_COLORS={alkali:'#ef4444',alkaline:'#f59e0b',transition:'#3b82f6',post:'#06b6d4',metalloid:'#22c55e',nonmetal:'#8b5cf6',noble:'#00d4ff',lanthanide:'#a855f7',actinide:'#f97316',hydrogen:'#14b8a6'};
-
 let ptBuilt=false,hlCat=null;
-
-const PT_LAYOUT=[
-  [1,1,1],[2,18,1],
-  [3,1,2],[4,2,2],[5,13,2],[6,14,2],[7,15,2],[8,16,2],[9,17,2],[10,18,2],
-  [11,1,3],[12,2,3],[13,13,3],[14,14,3],[15,15,3],[16,16,3],[17,17,3],[18,18,3],
-  [19,1,4],[20,2,4],[21,3,4],[22,4,4],[23,5,4],[24,6,4],[25,7,4],[26,8,4],[27,9,4],[28,10,4],[29,11,4],[30,12,4],[31,13,4],[32,14,4],[33,15,4],[34,16,4],[35,17,4],[36,18,4],
-  [37,1,5],[38,2,5],[39,3,5],[40,4,5],[41,5,5],[42,6,5],[43,7,5],[44,8,5],[45,9,5],[46,10,5],[47,11,5],[48,12,5],[49,13,5],[50,14,5],[51,15,5],[52,16,5],[53,17,5],[54,18,5],
-  [55,1,6],[56,2,6],[57,3,6],[72,4,6],[73,5,6],[74,6,6],[75,7,6],[76,8,6],[77,9,6],[78,10,6],[79,11,6],[80,12,6],[81,13,6],[82,14,6],[83,15,6],[84,16,6],[85,17,6],[86,18,6],
-  [87,1,7],[88,2,7],[89,3,7],[104,4,7],[105,5,7],[106,6,7],[107,7,7],[108,8,7],[109,9,7],[110,10,7],[111,11,7],[112,12,7],[113,13,7],[114,14,7],[115,15,7],[116,16,7],[117,17,7],[118,18,7],
-  [58,4,9],[59,5,9],[60,6,9],[61,7,9],[62,8,9],[63,9,9],[64,10,9],[65,11,9],[66,12,9],[67,13,9],[68,14,9],[69,15,9],[70,16,9],[71,17,9],
-  [90,4,10],[91,5,10],[92,6,10],[93,7,10],[94,8,10],[95,9,10],[96,10,10],[97,11,10],[98,12,10],[99,13,10],[100,14,10],[101,15,10],[102,16,10],[103,17,10]
-];
+const PT_LAYOUT=[[1,1,1],[2,18,1],[3,1,2],[4,2,2],[5,13,2],[6,14,2],[7,15,2],[8,16,2],[9,17,2],[10,18,2],[11,1,3],[12,2,3],[13,13,3],[14,14,3],[15,15,3],[16,16,3],[17,17,3],[18,18,3],[19,1,4],[20,2,4],[21,3,4],[22,4,4],[23,5,4],[24,6,4],[25,7,4],[26,8,4],[27,9,4],[28,10,4],[29,11,4],[30,12,4],[31,13,4],[32,14,4],[33,15,4],[34,16,4],[35,17,4],[36,18,4],[37,1,5],[38,2,5],[39,3,5],[40,4,5],[41,5,5],[42,6,5],[43,7,5],[44,8,5],[45,9,5],[46,10,5],[47,11,5],[48,12,5],[49,13,5],[50,14,5],[51,15,5],[52,16,5],[53,17,5],[54,18,5],[55,1,6],[56,2,6],[57,3,6],[72,4,6],[73,5,6],[74,6,6],[75,7,6],[76,8,6],[77,9,6],[78,10,6],[79,11,6],[80,12,6],[81,13,6],[82,14,6],[83,15,6],[84,16,6],[85,17,6],[86,18,6],[87,1,7],[88,2,7],[89,3,7],[104,4,7],[105,5,7],[106,6,7],[107,7,7],[108,8,7],[109,9,7],[110,10,7],[111,11,7],[112,12,7],[113,13,7],[114,14,7],[115,15,7],[116,16,7],[117,17,7],[118,18,7],[58,4,9],[59,5,9],[60,6,9],[61,7,9],[62,8,9],[63,9,9],[64,10,9],[65,11,9],[66,12,9],[67,13,9],[68,14,9],[69,15,9],[70,16,9],[71,17,9],[90,4,10],[91,5,10],[92,6,10],[93,7,10],[94,8,10],[95,9,10],[96,10,10],[97,11,10],[98,12,10],[99,13,10],[100,14,10],[101,15,10],[102,16,10],[103,17,10]];
 
 function buildPT(){
-  if(ptBuilt) return;
-  ptBuilt=true;
+  if(ptBuilt)return;ptBuilt=true;
   const grid=document.getElementById('ptGrid');
   const map={};
   PT_LAYOUT.forEach(([an,col,row])=>{map[`${row}-${col}`]=EL[an-1];});
@@ -159,7 +333,7 @@ function buildPT(){
         if(r===9&&c===3){html.push('<div class="ec lp" style="font-size:8px;padding:2px">57–71<br>Lanthan.</div>');continue;}
         if(r===10&&c===3){html.push('<div class="ec ap" style="font-size:8px;padding:2px">89–103<br>Actinide</div>');continue;}
         html.push('<div class="ec emp"></div>');
-      } else {
+      }else{
         html.push(`<div class="ec cat-${el.cat}" onclick="showElement(${el.n-1})" data-cat="${el.cat}" data-group="${el.group||0}"><span class="an">${el.n}</span><span class="sy">${el.sym}</span><span class="en">${el.name.substring(0,6)}</span><span class="em">${el.mass>0?el.mass.toFixed(1):''}</span></div>`);
       }
     }
@@ -222,221 +396,33 @@ function closeModal(e){
 }
 
 /* ══════════════════════════════════
-   AI SYSTEM PROMPTS
+   REACTION SOLVER
 ══════════════════════════════════ */
-const AI_SYSTEMS={
-  chem:`You are an elite Chemistry professor with PhD-level expertise. You solve ANY chemistry problem from basic to advanced quantum chemistry.
-
-FORMATTING RULES:
-- NEVER use LaTeX commands like \\frac, \\boxed, \\Longrightarrow. Use plain text with / for fractions.
-- NEVER include promotional text, ads, or "Powered by" footers.
-- Provide COMPLETE step-by-step solutions for all problems.
-- Use **bold** for key terms, formulas, and final answers.
-- For equations: write them clearly as text (e.g., "2H2 + O2 → 2H2O")
-- Handle: balancing equations, stoichiometry, thermodynamics, kinetics, quantum mechanics, organic synthesis, spectroscopy, and more.
-- If a problem is incomplete, ask for missing information.
-- Final answer must be clearly stated.`,
-
-  phys:`You are an elite Physics professor with PhD-level expertise. You solve ANY physics problem from basic kinematics to quantum field theory.
-
-FORMATTING RULES:
-- NEVER use LaTeX commands. Use plain text with / for fractions, ^ for powers.
-- NEVER include promotional text, ads, or "Powered by" footers.
-- Provide COMPLETE step-by-step solutions with clear reasoning.
-- Use **bold** for key terms, formulas, and final answers.
-- For multi-step problems, number each step.
-- Include all relevant equations: v = u + at, s = ut + (1/2)at^2, v^2 = u^2 + 2as, etc.
-- Handle: mechanics, electromagnetism, thermodynamics, quantum mechanics, relativity, optics, acoustics, fluid dynamics, and more.
-- If a problem is incomplete, ask for missing information.
-- Final answer must be clearly stated with units.`,
-
-  math:`You are an elite Mathematics professor with PhD-level expertise. You solve ANY math problem from arithmetic to advanced pure mathematics.
-
-FORMATTING RULES:
-- NEVER use LaTeX commands. Use plain text: / for fractions, ^ for powers, sqrt() for roots.
-- NEVER include promotional text, ads, or "Powered by" footers.
-- Provide COMPLETE step-by-step solutions with clear reasoning.
-- Use **bold** for key terms, formulas, and final answers.
-- Handle: algebra, calculus, differential equations, linear algebra, geometry, topology, number theory, statistics, complex analysis, and more.
-- For equations: write them clearly (e.g., "x^2 + 5x + 6 = 0")
-- For integrals: "∫ x^2 dx = x^3/3 + C"
-- For derivatives: "d/dx (x^3) = 3x^2"
-- If a problem is incomplete, ask for missing information.
-- Final answer must be clearly stated.`
-};
-
-/* ══════════════════════════════════
-   AI API CALL
-══════════════════════════════════ */
-async function callAI(subject,question){
-  const models=['openai','openai-large','mistral','llama'];
-  for(const model of models){
-    try{
-      const res=await fetch('https://text.pollinations.ai/openai',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-          model,
-          messages:[
-            {role:'system',content:AI_SYSTEMS[subject]},
-            {role:'user',content:question}
-          ],
-          temperature:0.2,
-          max_tokens:2000
-        })
-      });
-      if(!res.ok) continue;
-      const d=await res.json();
-      let content=d.choices?.[0]?.message?.content||d.content||'';
-      if(content&&content.length>5){
-        content=stripAds(content);
-        return content;
-      }
-    }catch(e){continue;}
-  }
-  throw new Error('Unable to reach AI. Please check your internet connection and try again.');
-}
-
-function stripAds(text){
-  text=text.replace(/---[\s\S]*?[Ss]upport\s+[Pp]ollinations[\s\S]*?---/g,'');
-  text=text.replace(/🌸[\s\S]*?🌸/g,'');
-  text=text.replace(/[Pp]owered by\s+Pollinations[^\n]*/g,'');
-  text=text.replace(/[Ss]upport our mission[\s\S]{0,300}$/,'');
-  text=text.replace(/[Ss]upport Pollinations[\s\S]{0,300}$/,'');
-  text=text.replace(/free text APIs[\s\S]{0,300}$/,'');
-  text=text.replace(/\n{3,}/g,'\n\n');
-  return text.trim();
-}
-
-function mdToHtml(t){
-  t=t.replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g,'($1)/($2)');
-  t=t.replace(/\\sqrt\{([^}]+)\}/g,'sqrt($1)');
-  t=t.replace(/\\int/g,'∫');
-  t=t.replace(/\\sum/g,'∑');
-  t=t.replace(/\\rightarrow|\\to/g,'→');
-  t=t.replace(/\\left|\\right/g,'');
-  t=t.replace(/\\\((.*?)\\\)/g,'$1');
-  t=t.replace(/\\\[(.*?)\\\]/g,'$1');
-  return t
-    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g,'<em>$1</em>')
-    .replace(/`(.+?)`/g,'<code>$1</code>')
-    .replace(/^#{1,3}\s+(.+)$/gm,'<strong style="color:var(--acc);display:block;margin:10px 0 4px">$1</strong>')
-    .replace(/^\d+\.\s+(.+)$/gm,'<li style="margin-bottom:4px">$1</li>')
-    .replace(/^[-•]\s+(.+)$/gm,'<li style="margin-bottom:4px">$1</li>')
-    .replace(/(<li[\s\S]*?<\/li>\s*)+/g,m=>`<ul style="padding-left:18px;margin:8px 0">${m}</ul>`)
-    .replace(/\n\n+/g,'<br><br>')
-    .replace(/\n(?![<])/g,'<br>');
-}
-
-async function askAI(subject){
-  const inp=document.getElementById(subject+'-q');
-  const q=inp.value.trim();
-  if(!q) return;
-  inp.value='';inp.style.height='auto';
-  const think=document.getElementById(subject+'-think');
-  const ans=document.getElementById(subject+'-ans');
-  const err=document.getElementById(subject+'-err');
-  const sbtn=document.getElementById(subject+'-sbtn');
-  err.classList.remove('show');
-  ans.classList.remove('show');
-  think.classList.add('show');
-  sbtn.disabled=true;
-  sbtn.innerHTML=`<svg class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg><span>...</span>`;
-  try{
-    const reply=await callAI(subject,q);
-    think.classList.remove('show');
-    document.getElementById(subject+'-acont').innerHTML=mdToHtml(reply);
-    ans.classList.add('show');
-    ans.scrollIntoView({behavior:'smooth',block:'nearest'});
-    toast('Solution ready!',subject);
-  }catch(e){
-    think.classList.remove('show');
-    document.getElementById(subject+'-emsg').textContent=e.message||'Connection error. Please check your network.';
-    err.classList.add('show');
-  }finally{
-    sbtn.disabled=false;
-    sbtn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg><span>Ask</span>`;
-  }
-}
-
-function copyAns(id){
-  const el=document.getElementById(id);
-  const text=el.innerText||el.textContent;
-  navigator.clipboard.writeText(text).then(()=>toast('Copied to clipboard!','chem')).catch(()=>{});
-}
-
-/* ══════ VOICE ══════ */
-let vRec=null,vTarget=null;
-function startVoice(inputId){
-  if(!('SpeechRecognition' in window||'webkitSpeechRecognition' in window)){toast('Voice not supported. Use Chrome/Edge.','math');return;}
-  vTarget=inputId;
-  const subj=inputId.split('-')[0];
-  const vbar=document.getElementById(subj+'-vbar');
-  const vtxt=document.getElementById(subj+'-vtxt');
-  const vbtn=document.getElementById(subj+'-vbtn');
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  vRec=new SR();
-  vRec.continuous=false;vRec.interimResults=true;vRec.lang='en-US';
-  vbtn.classList.add('rec');
-  vbar.classList.add('show');
-  vtxt.textContent='Listening...';
-  let final='';
-  vRec.onresult=ev=>{
-    let interim='';final='';
-    for(let i=ev.resultIndex;i<ev.results.length;i++){
-      if(ev.results[i].isFinal) final+=ev.results[i][0].transcript;
-      else interim+=ev.results[i][0].transcript;
-    }
-    vtxt.textContent=final||interim||'Listening...';
-  };
-  vRec.onend=()=>{
-    vbtn.classList.remove('rec');vbar.classList.remove('show');
-    if(final.trim()){document.getElementById(inputId).value=final.trim();askAI(subj);}
-  };
-  vRec.onerror=(ev)=>{
-    vbtn.classList.remove('rec');vbar.classList.remove('show');
-    if(ev.error==='not-allowed') toast('Microphone access denied.','math');
-    else if(ev.error!=='no-speech') toast('Voice error: '+ev.error,'math');
-  };
-  vRec.start();
-}
-
-function stopVoice(){
-  if(vRec) vRec.stop();
-  if(vTarget){const s=vTarget.split('-')[0];const vbtn=document.getElementById(s+'-vbtn');if(vbtn)vbtn.classList.remove('rec');const vbar=document.getElementById(s+'-vbar');if(vbar)vbar.classList.remove('show');}
-}
-
-/* ══════ REACTION SOLVER ══════ */
 async function solveRxn(){
   let raw=document.getElementById('rxnIn').value.trim();
   if(!raw){showRxnErr('Please enter a chemical equation.');return;}
   raw=normalizeEq(raw);
-  hideRxnErr();hideRxnRes();
-  setRxnLoad(true);
-  const prompt=`You are a chemistry expert. The user entered: "${raw}"
-Complete and balance the reaction. If ? marks unknown products, determine them.
-Return ONLY valid JSON (no markdown, no extra text):
-{
-  "balanced":"N2 + 3H2 -> 2NH3",
-  "reactants":[{"formula":"N2","coeff":1,"name":"Nitrogen gas"}],
-  "products":[{"formula":"NH3","coeff":2,"name":"Ammonia"}],
-  "reaction_type":"Synthesis reaction",
-  "reaction_name":"Haber-Bosch Process",
-  "steps":["Step 1...","Step 2..."],
-  "notes":"Conditions: 200atm, 400°C, iron catalyst"
-}
+  hideRxnErr();hideRxnRes();setRxnLoad(true);
+
+  const rxnSys=`You are an expert chemistry AI. Balance the given chemical equation. If ? marks unknown products, determine them.
+Return ONLY valid JSON — no markdown, no text outside the JSON object.
+Schema: {"balanced":"2H2 + O2 -> 2H2O","reactants":[{"formula":"H2","coeff":2,"name":"Hydrogen gas"}],"products":[{"formula":"H2O","coeff":2,"name":"Water"}],"reaction_type":"Synthesis","reaction_name":"Hydrogen Combustion","steps":["Step 1..."],"notes":"ΔH = -483.6 kJ/mol"}
 If invalid input: {"error":"explanation"}`;
+
   try{
-    const res=await fetch('https://text.pollinations.ai/openai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'openai',messages:[{role:'system',content:'Expert chemistry AI. Respond with valid JSON only. No markdown, no ads, no promotional text.'},{role:'user',content:prompt}],temperature:0.1})});
-    if(!res.ok) throw new Error(`Error ${res.status}`);
-    const d=await res.json();
-    const txt=d.choices?.[0]?.message?.content||d.content||'';
-    let json;
-    try{const cl=txt.replace(/```json\s*/gi,'').replace(/```/g,'').trim();json=JSON.parse(cl);}
-    catch(e){const m=txt.match(/\{[\s\S]*\}/);if(m)json=JSON.parse(m[0]);else throw new Error('Could not parse response.');}
-    if(json.error) throw new Error(json.error);
-    renderRxn(json);toast(`${json.reaction_name||'Reaction'} solved!`,'chem');
+    let json=null;
+    for(const p of PROVIDERS){
+      try{
+        const raw_r=await p.call(rxnSys,`Balance and complete: "${raw}"`);
+        const txt=cleanAIResponse(raw_r).replace(/```json\s*/gi,"").replace(/```/g,"").trim();
+        try{json=JSON.parse(txt);break;}
+        catch{const m=txt.match(/\{[\s\S]*\}/);if(m){try{json=JSON.parse(m[0]);break;}catch{}}}
+      }catch{}
+    }
+    if(!json)throw new Error("Could not get a valid response.");
+    if(json.error)throw new Error(json.error);
+    renderRxn(json);
+    toast(`${json.reaction_name||'Reaction'} solved!`,'chem');
   }catch(e){showRxnErr(e.message||'Something went wrong.');}
   finally{setRxnLoad(false);}
 }
@@ -445,9 +431,9 @@ function normalizeEq(eq){
   eq=eq.replace(/→/g,'=').replace(/-->/g,'=');
   eq=eq.replace(/\b([a-z]{1,2})(\d*)/g,(m,sym,num)=>{
     const cap=sym.charAt(0).toUpperCase()+sym.slice(1);
-    if(EL.find(e=>e.sym===cap)) return cap+num;
+    if(EL.find(e=>e.sym===cap))return cap+num;
     const up=sym.toUpperCase();
-    if(EL.find(e=>e.sym===up)) return up+num;
+    if(EL.find(e=>e.sym===up))return up+num;
     return m;
   });
   return eq;
@@ -470,7 +456,7 @@ function renderRxn(data){
   }).join('');
   setTimeout(()=>document.querySelectorAll('.ratio-bar[data-w]').forEach(b=>b.style.width=b.dataset.w+'%'),120);
   const steps=[...(data.steps||[])];
-  if(data.notes) steps.push('📋 '+data.notes);
+  if(data.notes)steps.push('📋 '+data.notes);
   all.forEach(c=>{const mm=calcMM(c.formula);if(mm)steps.push(`Molar mass of ${c.formula}: ${mm.toFixed(3)} g/mol`);});
   document.getElementById('stepsBody').innerHTML=steps.map((s,i)=>`<div class="step" style="animation-delay:${i*0.05}s"><div class="sn">${i+1}</div><div class="sc">${s}</div></div>`).join('');
   const bt=document.getElementById('stepsTog'),bd=document.getElementById('stepsBody');
@@ -479,17 +465,16 @@ function renderRxn(data){
 }
 
 function calcMM(f){try{return parseMM(f.replace(/[-=]/g,'').replace(/\s/g,''));}catch(e){return null;}}
-
 function parseMM(f){
   const stack=[{}];let i=0;
   while(i<f.length){
     if(f[i]==='('){stack.push({});i++;}
-    else if(f[i]===')'){i++;let ns='';while(i<f.length&&/\d/.test(f[i])){ns+=f[i];i++}const m2=ns?parseInt(ns):1;const top=stack.pop();for(const[e,c] of Object.entries(top))stack[stack.length-1][e]=(stack[stack.length-1][e]||0)+c*m2;}
+    else if(f[i]===')'){i++;let ns='';while(i<f.length&&/\d/.test(f[i])){ns+=f[i];i++}const m2=ns?parseInt(ns):1;const top=stack.pop();for(const[e,c]of Object.entries(top))stack[stack.length-1][e]=(stack[stack.length-1][e]||0)+c*m2;}
     else if(/[A-Z]/.test(f[i])){let el=f[i];i++;while(i<f.length&&/[a-z]/.test(f[i])){el+=f[i];i++}let ns='';while(i<f.length&&/\d/.test(f[i])){ns+=f[i];i++}const c=ns?parseInt(ns):1;stack[stack.length-1][el]=(stack[stack.length-1][el]||0)+c;}
     else{i++;}
   }
   const comp=stack[0];let mass=0;
-  for(const[e,n] of Object.entries(comp)){if(!MM[e])throw new Error(`Unknown: ${e}`);mass+=MM[e]*n;}
+  for(const[e,n]of Object.entries(comp)){if(!MM[e])throw new Error(`Unknown: ${e}`);mass+=MM[e]*n;}
   return mass;
 }
 
@@ -504,30 +489,28 @@ function showRxnErr(m){document.getElementById('rxn-emsg').textContent=m;documen
 function hideRxnErr(){document.getElementById('rxn-err').classList.remove('show');}
 function hideRxnRes(){document.getElementById('rxnResult').classList.remove('show');}
 function loadRxn(ex){document.getElementById('rxnIn').value=ex;hideRxnErr();hideRxnRes();toast('Example loaded — press Solve!','chem');}
-
 function toggleSteps(){
   const b=document.getElementById('stepsTog'),s=document.getElementById('stepsBody');
   b.classList.toggle('open');s.classList.toggle('open');
   b.querySelector('span').textContent=b.classList.contains('open')?'Hide Steps':'Show Step-by-Step Solution';
 }
 
-/* ══════ NAVIGATION ══════ */
+/* ══════════════════════════════════
+   NAVIGATION
+══════════════════════════════════ */
 let currentPage='home';
-
 function goHome(){
   showPage('home');
   document.querySelectorAll('.nav-btn').forEach(b=>{b.className='nav-btn';});
   document.getElementById('nav-chem').classList.add('act-chem');
   window.scrollTo({top:0,behavior:'smooth'});
 }
-
 function showPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById(id+'-page').classList.add('active');
   currentPage=id;
   window.scrollTo({top:0,behavior:'smooth'});
 }
-
 function gotoSubject(subj){
   showPage(subj);
   document.querySelectorAll('.nav-btn').forEach(b=>b.className='nav-btn');
@@ -536,23 +519,22 @@ function gotoSubject(subj){
   const accsL={chem:'#2563eb',phys:'#059669',math:'#db2777'};
   const isDark=document.documentElement.getAttribute('data-theme')==='dark';
   document.documentElement.style.setProperty('--acc',isDark?accs[subj]:accsL[subj]);
-  if(subj==='chem') buildPT();
+  if(subj==='chem')buildPT();
 }
-
 function switchSection(s){gotoSubject(s);}
-
 function switchChemTab(tab){
   document.querySelectorAll('.chem-sub').forEach(el=>el.style.display='none');
   document.getElementById('c-'+tab).style.display='block';
   document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));
   document.getElementById('cs-'+tab).classList.add('active');
-  if(tab==='pt') buildPT();
+  if(tab==='pt')buildPT();
 }
 
-/* ══════ THEME ══════ */
+/* ══════════════════════════════════
+   THEME
+══════════════════════════════════ */
 let isLight=false;
 try{isLight=localStorage.getItem('slTheme')==='light';}catch(e){}
-
 function applyTheme(){
   document.documentElement.setAttribute('data-theme',isLight?'light':'dark');
   const icon=document.getElementById('themeIcon');
@@ -563,17 +545,20 @@ function applyTheme(){
   }
   try{localStorage.setItem('slTheme',isLight?'light':'dark');}catch(e){}
 }
-
 function toggleTheme(){isLight=!isLight;applyTheme();}
 
-/* ══════ CREDITS POPUP ══════ */
+/* ══════════════════════════════════
+   CREDITS POPUP
+══════════════════════════════════ */
 function toggleCreds(){document.getElementById('credPopup').classList.toggle('open');}
 document.addEventListener('click',e=>{
   if(!document.getElementById('credWrap').contains(e.target))
     document.getElementById('credPopup').classList.remove('open');
 });
 
-/* ══════ TOAST ══════ */
+/* ══════════════════════════════════
+   TOAST
+══════════════════════════════════ */
 let toastT;
 function toast(msg,type='chem'){
   const cols={chem:'#4f8ef7',phys:'#00e87a',math:'#ff6b9d'};
@@ -584,7 +569,49 @@ function toast(msg,type='chem'){
   toastT=setTimeout(()=>el.classList.remove('show'),3200);
 }
 
-/* ══════ AUTO-RESIZE TEXTAREA ══════ */
+/* ══════════════════════════════════
+   VOICE
+══════════════════════════════════ */
+let vRec=null,vTarget=null;
+function startVoice(inputId){
+  if(!('SpeechRecognition' in window||'webkitSpeechRecognition' in window)){toast('Voice not supported. Use Chrome/Edge.','math');return;}
+  vTarget=inputId;
+  const subj=inputId.split('-')[0];
+  const vbar=document.getElementById(subj+'-vbar');
+  const vtxt=document.getElementById(subj+'-vtxt');
+  const vbtn=document.getElementById(subj+'-vbtn');
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  vRec=new SR();
+  vRec.continuous=false;vRec.interimResults=true;vRec.lang='en-US';
+  vbtn.classList.add('rec');vbar.classList.add('show');vtxt.textContent='Listening...';
+  let final='';
+  vRec.onresult=ev=>{
+    let interim='';final='';
+    for(let i=ev.resultIndex;i<ev.results.length;i++){
+      if(ev.results[i].isFinal)final+=ev.results[i][0].transcript;
+      else interim+=ev.results[i][0].transcript;
+    }
+    vtxt.textContent=final||interim||'Listening...';
+  };
+  vRec.onend=()=>{
+    vbtn.classList.remove('rec');vbar.classList.remove('show');
+    if(final.trim()){document.getElementById(inputId).value=final.trim();askAI(subj);}
+  };
+  vRec.onerror=(ev)=>{
+    vbtn.classList.remove('rec');vbar.classList.remove('show');
+    if(ev.error==='not-allowed')toast('Microphone access denied.','math');
+    else if(ev.error!=='no-speech')toast('Voice error: '+ev.error,'math');
+  };
+  vRec.start();
+}
+function stopVoice(){
+  if(vRec)vRec.stop();
+  if(vTarget){const s=vTarget.split('-')[0];const vbtn=document.getElementById(s+'-vbtn');if(vbtn)vbtn.classList.remove('rec');const vbar=document.getElementById(s+'-vbar');if(vbar)vbar.classList.remove('show');}
+}
+
+/* ══════════════════════════════════
+   AUTO-RESIZE TEXTAREA
+══════════════════════════════════ */
 document.querySelectorAll('.q-input').forEach(ta=>{
   ta.addEventListener('input',function(){this.style.height='auto';this.style.height=Math.min(this.scrollHeight,150)+'px';});
   ta.addEventListener('keydown',function(e){
@@ -593,21 +620,29 @@ document.querySelectorAll('.q-input').forEach(ta=>{
 });
 document.getElementById('rxnIn').addEventListener('keydown',e=>{if(e.key==='Enter')solveRxn();});
 
-/* ══════ KEYBOARD ══════ */
+/* ══════════════════════════════════
+   KEYBOARD
+══════════════════════════════════ */
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();stopVoice();}});
 
-/* ══════ INTERSECTION OBSERVER ══════ */
+/* ══════════════════════════════════
+   INTERSECTION OBSERVER
+══════════════════════════════════ */
 const observer=new IntersectionObserver((entries)=>{
   entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('in-view');}});
 },{threshold:0.1});
 document.querySelectorAll('.fade-section').forEach(el=>observer.observe(el));
 
-/* ══════ SPLASH ══════ */
+/* ══════════════════════════════════
+   SPLASH
+══════════════════════════════════ */
 setTimeout(()=>{
   document.getElementById('splash').classList.add('out');
   setTimeout(()=>{document.getElementById('splash').style.display='none';},850);
 },2800);
 
-/* ══════ INIT ══════ */
+/* ══════════════════════════════════
+   INIT
+══════════════════════════════════ */
 applyTheme();
 setTimeout(()=>toast('Welcome to ScienceLab!','chem'),3200);
