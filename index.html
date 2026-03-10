@@ -7,9 +7,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -84,7 +81,7 @@
           </div>
           <div>
             <div class="cred-popup-title">ScienceLab</div>
-            <div class="cred-popup-ver">V1.0 · 2026</div>
+            <div class="cred-popup-ver">V2.0 · 2026</div>
           </div>
         </div>
         <div class="cred-body">
@@ -103,7 +100,7 @@
             </div>
             <div class="cred-row-info">
               <div class="cred-row-label">AI Engine</div>
-              <div class="cred-row-val">Pollinations.ai</div>
+              <div class="cred-row-val">Unnamed</div>
             </div>
           </div>
           <div class="cred-row">
@@ -111,8 +108,8 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
             </div>
             <div class="cred-row-info">
-              <div class="cred-row-label">AI Assistance</div>
-              <div class="cred-row-val">Claude · DeepSeek</div>
+              <div class="cred-row-label">AI Models</div>
+              <div class="cred-row-val">Unnamed</div>
             </div>
           </div>
           <div class="cred-row">
@@ -243,7 +240,7 @@
       </div>
       <div class="solver-body">
         <div class="q-input-wrap">
-          <textarea class="q-input" id="chem-q" placeholder="Ask any question." rows="2"></textarea>
+          <textarea class="q-input" id="chem-q" placeholder="Ask any chemistry question — from basic to PhD level." rows="2"></textarea>
           <div class="q-btns">
             <button class="qb voice-qb" id="chem-vbtn" onclick="startVoice('chem-q')" title="Voice Input">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
@@ -345,7 +342,7 @@
     </div>
     <div class="solver-body">
       <div class="q-input-wrap">
-        <textarea class="q-input" id="phys-q" placeholder="Ask any question." rows="2"></textarea>
+        <textarea class="q-input" id="phys-q" placeholder="Ask any physics question — from basic to PhD level." rows="2"></textarea>
         <div class="q-btns">
           <button class="qb voice-qb" id="phys-vbtn" onclick="startVoice('phys-q')" title="Voice Input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>
           <button class="qb send-qb" id="phys-sbtn" onclick="askAI('phys')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg><span>Ask</span></button>
@@ -386,7 +383,7 @@
     </div>
     <div class="solver-body">
       <div class="q-input-wrap">
-        <textarea class="q-input" id="math-q" placeholder="Ask any question." rows="2"></textarea>
+        <textarea class="q-input" id="math-q" placeholder="Ask any math question — from basic to IMO/Putnam level." rows="2"></textarea>
         <div class="q-btns">
           <button class="qb voice-qb" id="math-vbtn" onclick="startVoice('math-q')" title="Voice Input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>
           <button class="qb send-qb" id="math-sbtn" onclick="askAI('math')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg><span>Ask</span></button>
