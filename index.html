@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScienceLab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-radial"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-atom">
+    <div class="splash-nucleus"></div>
+    <div class="splash-orbit o1"><div class="e-dot"></div></div>
+    <div class="splash-orbit o2"><div class="e-dot" style="background:#a78bfa;box-shadow:0 0 6px #a78bfa"></div></div>
+    <div class="splash-orbit o3"><div class="e-dot" style="background:#00e87a;box-shadow:0 0 6px #00e87a"></div></div>
+  </div>
+  <div class="splash-name">Science<span class="lab">Lab</span></div>
+  <div class="splash-tag">DESIGNED BY MEKABYA!</div>
+  <div class="splash-bar"><div class="splash-prog"></div></div>
+</div>
+
+<!-- ELEMENT MODAL -->
+<div class="moverlay" id="modal" onclick="closeModal(event)">
+  <div class="mcard" id="mcard"></div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><div class="toast-dot" id="tdot"></div><span id="tmsg"></span></div>
+
+<div class="wrap">
+
+<!-- HEADER -->
+<header class="hdr" id="mainHdr">
+  <div class="logo" onclick="goHome()">
+    <div class="logo-atom">
+      <div class="logo-nuc"></div>
+      <div class="logo-orbit la1"><div class="la-dot"></div></div>
+      <div class="logo-orbit la2"><div class="la-dot"></div></div>
+      <div class="logo-orbit la3"><div class="la-dot"></div></div>
+    </div>
+    <div class="logo-text">
+      <div class="logo-name">Science<span class="lab">Lab</span></div>
+      <div class="logo-tag"></div>
+    </div>
+  </div>
+
+  <nav class="nav" id="mainNav">
+    <button class="nav-btn act-chem" id="nav-chem" onclick="switchSection('chem')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M9 3v8l-4 9h14L15 11V3"/><path d="M7 16h10"/></svg>
+      <span>Chemistry</span>
+    </button>
+    <button class="nav-btn" id="nav-phys" onclick="switchSection('phys')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
+      <span>Physics</span>
+    </button>
+    <button class="nav-btn" id="nav-math" onclick="switchSection('math')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2v10l8.4 4.8"/><path d="M2 12h10L7.6 6.8"/></svg>
+      <span>Mathematics</span>
+    </button>
+  </nav>
+
+  <div class="hdr-right">
+    <div class="cred-wrap" id="credWrap">
+      <button class="icon-btn" onclick="toggleCreds()" title="Credits">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      </button>
+      <div class="cred-popup" id="credPopup">
+        <div class="cred-popup-hdr">
+          <div class="cred-popup-hdr-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          </div>
+          <div>
+            <div class="cred-popup-title">ScienceLab</div>
+            <div class="cred-popup-ver">V1.0 · 2026</div>
+          </div>
+        </div>
+        <div class="cred-body">
+          <div class="cred-row">
+            <div class="cred-row-icon cri-dev">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            </div>
+            <div class="cred-row-info">
+              <div class="cred-row-label">Developer</div>
+              <div class="cred-row-val">Kabya Saha</div>
+            </div>
+          </div>
+          <div class="cred-row">
+            <div class="cred-row-icon cri-ai">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
+            </div>
+            <div class="cred-row-info">
+              <div class="cred-row-label">AI Engine</div>
+              <div class="cred-row-val">Pollinations.ai</div>
+            </div>
+          </div>
+          <div class="cred-row">
+            <div class="cred-row-icon cri-assist">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            </div>
+            <div class="cred-row-info">
+              <div class="cred-row-label">AI Assistance</div>
+              <div class="cred-row-val">Claude · DeepSeek</div>
+            </div>
+          </div>
+          <div class="cred-row">
+            <div class="cred-row-icon cri-date">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+            <div class="cred-row-info">
+              <div class="cred-row-label">Released</div>
+              <div class="cred-row-val">10 March 2026</div>
+            </div>
+          </div>
+        </div>
+        <div class="cred-footer">UNDER MAINTENANCE</div>
+      </div>
+    </div>
+    <button class="icon-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle Theme">
+      <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- HOME PAGE -->
+<div class="page active" id="home-page">
+  <section class="hero">
+    <div class="hero-title">AI POWERED<br>SMART STUDY COMPANION!</div>
+    <p class="hero-sub">Solve any problem related to Chemistry · Physics · Mathematics</p>
+    <div class="hero-badge">UNDER MAINTENANCE</div>
+  </section>
+
+  <div class="cards-grid" id="homeCards">
+    <div class="subj-card c" onclick="gotoSubject('chem')">
+      <div class="sc-icon-wrap">
+        <div class="atom-3d">
+          <div class="atom-nucleus"></div>
+          <div class="atom-ring ring1"><div class="electron"></div></div>
+          <div class="atom-ring ring2"><div class="electron"></div></div>
+          <div class="atom-ring ring3"><div class="electron"></div></div>
+        </div>
+      </div>
+      <div class="sc-label">Chemistry</div>
+      <div class="sc-enter">
+        <span>Enter Chemistry Lab</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </div>
+
+    <div class="subj-card p" onclick="gotoSubject('phys')">
+      <div class="sc-icon-wrap">
+        <div class="pendulum-3d">
+          <div class="pendulum-frame"></div>
+          <div class="pendulum-bob"></div>
+          <div class="pendulum-shadow"></div>
+        </div>
+      </div>
+      <div class="sc-label">Physics</div>
+      <div class="sc-enter">
+        <span>Enter Physics Lab</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </div>
+
+    <div class="subj-card m" onclick="gotoSubject('math')">
+      <div class="sc-icon-wrap">
+        <div class="triangle-3d">
+          <div class="triangle-face face1"></div>
+          <div class="triangle-face face2"></div>
+          <div class="triangle-face face3"></div>
+          <div class="triangle-glow"></div>
+        </div>
+      </div>
+      <div class="sc-label">Mathematics</div>
+      <div class="sc-enter">
+        <span>Enter Math Lab</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <footer class="ftr">
+    <div class="ftr-logo">Science<span class="lab">Lab</span></div>
+    <div class="ftr-copy">© 2026 All Rights Reserved · Kabya Saha</div>
+  </footer>
+</div>
+
+<!-- CHEMISTRY PAGE -->
+<div class="page" id="chem-page">
+  <div class="subj-page-hdr" id="chem-phdr">
+    <button class="back-btn" onclick="goHome()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Back to Home
+    </button>
+    <div class="spg-title">Chemistry Lab</div>
+    <div class="spg-divider"></div>
+    <div class="spg-badge" style="color:var(--chem);border-color:rgba(79,142,247,.3);display:flex;align-items:center;gap:6px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M9 3v8l-4 9h14L15 11V3"/><path d="M7 16h10"/></svg>
+      CHEMISTRY
+    </div>
+  </div>
+
+  <div class="stabs" id="chem-stabs">
+    <button class="stab active" id="cs-ai" onclick="switchChemTab('ai')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/></svg>
+      AI Assistant
+    </button>
+    <button class="stab" id="cs-rxn" onclick="switchChemTab('rxn')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6M9 3v8l-4 9h14L15 11V3"/><path d="M7 16h10"/></svg>
+      Reaction Calculator
+      <span class="stab-badge">NEW</span>
+    </button>
+    <button class="stab" id="cs-pt" onclick="switchChemTab('pt')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Periodic Table
+      <span class="stab-badge">NEW</span>
+    </button>
+  </div>
+
+  <!-- Chem AI Tab -->
+  <div id="c-ai" class="chem-sub active">
+    <div class="solver-card">
+      <div class="card-hdr">
+        <div class="ch-icon ci-chem">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6M9 3v8l-4 9h14L15 11V3"/><path d="M7 16h10"/></svg>
+        </div>
+        <div>
+          <div class="ch-title">STEVE : Chemistry AI Assistant</div>
+          <div class="ch-sub">Powered by ScienceLab · Voice Enabled</div>
+        </div>
+      </div>
+      <div class="solver-body">
+        <div class="q-input-wrap">
+          <textarea class="q-input" id="chem-q" placeholder="Ask any question." rows="2"></textarea>
+          <div class="q-btns">
+            <button class="qb voice-qb" id="chem-vbtn" onclick="startVoice('chem-q')" title="Voice Input">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            </button>
+            <button class="qb send-qb" id="chem-sbtn" onclick="askAI('chem')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              <span>Ask</span>
+            </button>
+          </div>
+        </div>
+        <div class="voice-bar" id="chem-vbar"><div class="voice-bar-waves"><div class="vw"></div><div class="vw"></div><div class="vw"></div><div class="vw"></div><div class="vw"></div></div><span class="vbar-text" id="chem-vtxt">Listening...</span><button class="vbar-stop" onclick="stopVoice()">Stop</button></div>
+        <div class="thinking" id="chem-think"><div class="tdots"><div class="td"></div><div class="td"></div><div class="td"></div></div><span>Solving your problem...</span></div>
+        <div class="err-msg" id="chem-err"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span id="chem-emsg"></span></div>
+        <div class="answer-box" id="chem-ans">
+          <div class="ans-banner"><div class="ans-label" style="color:var(--chem)">ANSWER</div><div class="ans-content" id="chem-acont"></div></div>
+          <div class="ans-meta"><div class="ans-subj"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px"><path d="M9 3h6M9 3v8l-4 9h14L15 11V3"/></svg></div><button class="copy-btn" onclick="copyAns('chem-acont')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chem Reaction Calculator Tab -->
+  <div id="c-rxn" class="chem-sub" style="display:none">
+    <div class="solver-card">
+      <div class="card-hdr">
+        <div class="ch-icon ci-chem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6M9 3v8l-4 9h14L15 11V3"/><path d="M7 16h10"/></svg></div>
+        <div><div class="ch-title">Reaction Solver &amp; Balancer</div><div class="ch-sub">Type any reaction — use ? for unknown products</div></div>
+      </div>
+      <div class="solver-body">
+        <div class="rxn-input-row">
+          <input class="rxn-input" id="rxnIn" placeholder="e.g. H2 + O2 = ? or Fe + HCl = ?" autocomplete="off" spellcheck="false"/>
+        </div>
+        <div class="rxn-meta">Format : N2 + 3H2 = ?</div>
+        <div class="chips">
+          <div class="chip" onclick="loadRxn('H2 + O2 = ?')">H₂ + O₂</div>
+          <div class="chip" onclick="loadRxn('Fe + HCl = ?')">Fe + HCl</div>
+          <div class="chip" onclick="loadRxn('CH4 + O2 = ?')">Combustion</div>
+          <div class="chip" onclick="loadRxn('NaOH + HCl = ?')">Neutralisation</div>
+          <div class="chip" onclick="loadRxn('Na + H2O = ?')">Na + H₂O</div>
+        </div>
+        <button class="solve-btn" id="solveBtn" onclick="solveRxn()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          SOLVE WITH AI
+        </button>
+        <div class="rxn-thinking" id="rxnThinking" style="display:none"><div class="tdots"><div class="td"></div><div class="td"></div><div class="td"></div></div><span>Solving reaction...</span></div>
+        <div class="err-msg" id="rxn-err" style="margin-top:10px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg><span id="rxn-emsg"></span></div>
+        <div class="rxn-result" id="rxnResult">
+          <div class="eq-banner"><div class="eq-lbl">BALANCED EQUATION</div><div class="eq-line" id="eqLine"></div><div class="rxn-name-lbl" id="rxnName"></div></div>
+          <div class="compounds" id="compounds"></div>
+          <div class="ratio-sec" id="ratioSec"></div>
+          <div class="steps-wrap"><button class="steps-tog" id="stepsTog" onclick="toggleSteps()"><span>Show Step-by-Step Solution</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button><div class="steps-body" id="stepsBody"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Periodic Table Tab -->
+  <div id="c-pt" class="chem-sub" style="display:none">
+    <div class="pt-hdr">
+      <div class="pt-hdr-title">Periodic Table of Elements</div>
+      <div class="pt-legend" id="ptLegend"></div>
+    </div>
+    <div class="group-hl-label" id="hlLabel">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Showing: <strong id="hlName"></strong>
+      <button onclick="clearHighlight()">✕ Clear</button>
+    </div>
+    <div class="pt-scroll">
+      <div class="pt-grid" id="ptGrid"></div>
+    </div>
+  </div>
+
+  <footer class="ftr" style="margin-top:28px">
+    <div class="ftr-logo">Science<span class="lab">Lab</span></div>
+    <div class="ftr-copy">© 2026 All Rights Reserved · Kabya Saha</div>
+  </footer>
+</div>
+
+<!-- PHYSICS PAGE -->
+<div class="page" id="phys-page">
+  <div class="subj-page-hdr">
+    <button class="back-btn" onclick="goHome()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Back to Home
+    </button>
+    <div class="spg-title">Physics Lab</div>
+    <div class="spg-divider"></div>
+    <div class="spg-badge" style="color:var(--phys);border-color:rgba(0,232,122,.3);display:flex;align-items:center;gap:6px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
+      PHYSICS
+    </div>
+  </div>
+  <div class="solver-card">
+    <div class="card-hdr">
+      <div class="ch-icon ci-phys">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
+      </div>
+      <div><div class="ch-title">ELEVEN : Physics AI Assistant</div><div class="ch-sub">Powered by ScienceLab · Voice Enabled</div></div>
+    </div>
+    <div class="solver-body">
+      <div class="q-input-wrap">
+        <textarea class="q-input" id="phys-q" placeholder="Ask any question." rows="2"></textarea>
+        <div class="q-btns">
+          <button class="qb voice-qb" id="phys-vbtn" onclick="startVoice('phys-q')" title="Voice Input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>
+          <button class="qb send-qb" id="phys-sbtn" onclick="askAI('phys')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg><span>Ask</span></button>
+        </div>
+      </div>
+      <div class="voice-bar" id="phys-vbar"><div class="voice-bar-waves"><div class="vw"></div><div class="vw"></div><div class="vw"></div><div class="vw"></div><div class="vw"></div></div><span class="vbar-text" id="phys-vtxt">Listening...</span><button class="vbar-stop" onclick="stopVoice()">Stop</button></div>
+      <div class="thinking" id="phys-think"><div class="tdots"><div class="td"></div><div class="td"></div><div class="td"></div></div><span>Solving your problem...</span></div>
+      <div class="err-msg" id="phys-err"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg><span id="phys-emsg"></span></div>
+      <div class="answer-box" id="phys-ans">
+        <div class="ans-banner"><div class="ans-label" style="color:var(--phys)">ANSWER</div><div class="ans-content" id="phys-acont"></div></div>
+        <div class="ans-meta"><div class="ans-subj"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3"/></svg></div><button class="copy-btn" onclick="copyAns('phys-acont')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button></div>
+      </div>
+    </div>
+  </div>
+  <footer class="ftr" style="margin-top:28px"><div class="ftr-logo">Science<span class="lab">Lab</span></div><div class="ftr-copy">© 2026 All Rights Reserved · Kabya Saha</div></footer>
+</div>
+
+<!-- MATH PAGE -->
+<div class="page" id="math-page">
+  <div class="subj-page-hdr">
+    <button class="back-btn" onclick="goHome()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Back to Home
+    </button>
+    <div class="spg-title">Mathematics Lab</div>
+    <div class="spg-divider"></div>
+    <div class="spg-badge" style="color:var(--math);border-color:rgba(255,107,157,.3);display:flex;align-items:center;gap:6px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><circle cx="12" cy="12" r="10"/><path d="M12 2v10l8.4 4.8"/><path d="M2 12h10L7.6 6.8"/></svg>
+      MATHEMATICS
+    </div>
+  </div>
+  <div class="solver-card">
+    <div class="card-hdr">
+      <div class="ch-icon ci-math">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2v10l8.4 4.8"/><path d="M2 12h10L7.6 6.8"/></svg>
+      </div>
+      <div><div class="ch-title">MAX : Mathematics AI Assistant</div><div class="ch-sub">Powered by ScienceLab · Voice Enabled</div></div>
+    </div>
+    <div class="solver-body">
+      <div class="q-input-wrap">
+        <textarea class="q-input" id="math-q" placeholder="Ask any question." rows="2"></textarea>
+        <div class="q-btns">
+          <button class="qb voice-qb" id="math-vbtn" onclick="startVoice('math-q')" title="Voice Input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>
+          <button class="qb send-qb" id="math-sbtn" onclick="askAI('math')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg><span>Ask</span></button>
+        </div>
+      </div>
+      <div class="voice-bar" id="math-vbar"><div class="voice-bar-waves"><div class="vw"></div><div class="vw"></div><div class="vw"></div><div class="vw"></div><div class="vw"></div></div><span class="vbar-text" id="math-vtxt">Listening...</span><button class="vbar-stop" onclick="stopVoice()">Stop</button></div>
+      <div class="thinking" id="math-think"><div class="tdots"><div class="td"></div><div class="td"></div><div class="td"></div></div><span>Solving your problem...</span></div>
+      <div class="err-msg" id="math-err"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg><span id="math-emsg"></span></div>
+      <div class="answer-box" id="math-ans">
+        <div class="ans-banner"><div class="ans-label" style="color:var(--math)">SOLUTION</div><div class="ans-content" id="math-acont"></div></div>
+        <div class="ans-meta"><div class="ans-subj"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px"><circle cx="12" cy="12" r="10"/><path d="M12 2v10l8.4 4.8"/><path d="M2 12h10L7.6 6.8"/></svg></div><button class="copy-btn" onclick="copyAns('math-acont')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button></div>
+      </div>
+    </div>
+  </div>
+  <footer class="ftr" style="margin-top:28px"><div class="ftr-logo">Science<span class="lab">Lab</span></div><div class="ftr-copy">© 2026 All Rights Reserved · Kabya Saha</div></footer>
+</div>
+
+</div><!-- /wrap -->
+
+<script src="script.js"></script>
+</body>
+</html>
