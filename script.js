@@ -5,8 +5,8 @@
 ══════════════════════════════════════════════════════════════ */
 
 /* ── API KEYS ─────────────────────────────────────────────── */
-const GROQ_KEY       = "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";
-const OPENROUTER_KEY = "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";
+const GROQ_KEY       = "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";
+const OPENROUTER_KEY = "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";
 
 /* ══════════════════════════════════
    ELEMENT DATA (all 118)
