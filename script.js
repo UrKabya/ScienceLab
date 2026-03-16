@@ -1,12 +1,12 @@
 /* ══════════════════════════════════════════════════════════════
-   SCIENCELAB — COMPLETE SCRIPT  v2.0
+   SCIENCELAB — COMPLETE SCRIPT  v2.1
    MIT-Level AI · Groq + OpenRouter fallback chain
    Developer: Kabya Saha
 ══════════════════════════════════════════════════════════════ */
 
 /* ── API KEYS ─────────────────────────────────────────────── */
-const GROQ_KEY       = "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";
-const OPENROUTER_KEY = "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";
+const GROQ_KEY       = "YOUR_NEW_GROQ_KEY_HERE";
+const OPENROUTER_KEY = "YOUR_NEW_OPENROUTER_KEY_HERE";
 
 /* ══════════════════════════════════
    ELEMENT DATA (all 118)
@@ -135,11 +135,11 @@ const EL=[
 const MM={H:1.008,He:4.003,Li:6.94,Be:9.012,B:10.81,C:12.011,N:14.007,O:15.999,F:18.998,Ne:20.18,Na:22.99,Mg:24.305,Al:26.982,Si:28.085,P:30.974,S:32.06,Cl:35.45,Ar:39.948,K:39.098,Ca:40.078,Fe:55.845,Cu:63.546,Zn:65.38,Ag:107.868,Au:196.967,Hg:200.592,Pb:207.2,Sn:118.71,Mn:54.938,Cr:51.996,Co:58.933,Ni:58.693,Mo:95.95,Br:79.904,I:126.904,Ba:137.327,Sr:87.62};
 
 /* ══════════════════════════════════
-   MIT-LEVEL SYSTEM PROMPTS
+   MIT-LEVEL SYSTEM PROMPTS  v2.1
+   Warm · Rigorous · Human
 ══════════════════════════════════ */
 const AI_SYSTEMS = {
-  math: {
-    prompt: `You are a brilliant, friendly mathematics tutor — think of a Harvard PhD who genuinely loves teaching. You combine rigorous accuracy with warmth and clarity.
+  math: `You are a brilliant, friendly mathematics tutor — think of a Harvard PhD who genuinely loves teaching. You combine rigorous accuracy with warmth and clarity.
 
 PERSONALITY & TONE:
 - Start with a brief, natural acknowledgment (1 sentence max) — never robotic, never over-the-top.
@@ -160,11 +160,9 @@ Symbols: ∈ ∉ ⊆ ∩ ∪ ∀ ∃ ⇒ ⟺ ℝ ℤ ℚ ℂ ℕ ∞ ∂ ∇ Δ 
 
 RIGOR: Never skip steps. Proofs follow: Given → Claim → Proof → QED. Always name the theorem or technique used.
 
-SCOPE: Arithmetic through research-level — calculus, real/complex analysis, ODEs/PDEs, linear algebra, abstract algebra, number theory, combinatorics, probability & statistics, topology, differential geometry, functional analysis, optimization, IMO/Putnam competition math.`
-  },
+SCOPE: Arithmetic through research-level — calculus, real/complex analysis, ODEs/PDEs, linear algebra, abstract algebra, number theory, combinatorics, probability & statistics, topology, differential geometry, functional analysis, optimization, IMO/Putnam competition math.`,
 
-  phys: {
-    prompt: `You are a brilliant, friendly physics tutor — imagine a Caltech PhD who finds the universe genuinely fascinating and loves sharing that wonder. You're rigorous, clear, and human.
+  phys: `You are a brilliant, friendly physics tutor — imagine a Caltech PhD who finds the universe genuinely fascinating and loves sharing that wonder. You're rigorous, clear, and human.
 
 PERSONALITY & TONE:
 - Open with a brief natural acknowledgment or a touch of enthusiasm for the problem (1 sentence).
@@ -186,11 +184,9 @@ NA=6.022×10^23 mol⁻¹ | R=8.314 J/(mol·K) | g=9.81 m/s²
 
 RIGOR: Units on every result. State reference frame for mechanics/relativity. Show all substitutions — no skipped algebra.
 
-SCOPE: Classical mechanics (Newtonian/Lagrangian/Hamiltonian), E&M (Maxwell, circuits), thermodynamics & stat mech, quantum mechanics, special & general relativity, optics, fluid dynamics, nuclear & particle physics, astrophysics.`
-  },
+SCOPE: Classical mechanics (Newtonian/Lagrangian/Hamiltonian), E&M (Maxwell, circuits), thermodynamics & stat mech, quantum mechanics, special & general relativity, optics, fluid dynamics, nuclear & particle physics, astrophysics.`,
 
-  chem: {
-    prompt: `You are a brilliant, friendly chemistry tutor — a MIT/Caltech PhD who loves the elegance of molecular logic and genuinely enjoys helping students see it too. Precise, warm, and clear.
+  chem: `You are a brilliant, friendly chemistry tutor — a MIT/Caltech PhD who loves the elegance of molecular logic and genuinely enjoys helping students see it too. Precise, warm, and clear.
 
 PERSONALITY & TONE:
 - Open with a brief natural acknowledgment (1 sentence) — never stiff or robotic.
@@ -212,7 +208,6 @@ KEY EQUATIONS:
 E=E°-(RT/nF)·ln(Q) | k=A·e^(-Ea/RT) | A=εlc | PV=nRT
 
 SCOPE: Stoichiometry, equilibrium (ICE tables), acid-base (polyprotic, buffers, titrations), thermodynamics (Hess's law), kinetics (rate laws, Arrhenius, mechanisms), electrochemistry (Nernst), quantum chemistry, organic chemistry (all mechanisms, synthesis, NMR/IR/MS), coordination chemistry, nuclear chemistry.`
-  }
 };
 
 /* ══════════════════════════════════
@@ -255,17 +250,38 @@ const PROVIDERS = [
 
 /* ══════════════════════════════════
    CORE AI CALL — auto-fallback
+   FIX: AI_SYSTEMS values are now plain
+   strings so sys is always a string
 ══════════════════════════════════ */
-async function callAI(subject,question){
-  const sys=AI_SYSTEMS[subject];
-  for(const p of PROVIDERS){
-    try{
-      const raw=await p.call(sys,question);
-      const out=cleanAIResponse(raw);
-      if(out&&out.length>10){console.info(`✅ solved via ${p.name}`);return out;}
-    }catch(e){console.warn(`⚠️ ${p.name} failed:`,e.message);}
+async function callAI(subject, question) {
+  // Safe getter — works whether value is a plain string or { prompt: "..." }
+  const sys = typeof AI_SYSTEMS[subject] === 'string'
+    ? AI_SYSTEMS[subject]
+    : (AI_SYSTEMS[subject]?.prompt || '');
+
+  if (!sys) throw new Error(`Unknown subject: ${subject}`);
+
+  for (const p of PROVIDERS) {
+    try {
+      console.log(`🔄 Trying ${p.name}...`);
+      const raw = await p.call(sys, question);
+      const out = cleanAIResponse(raw);
+      if (out && out.length > 10) {
+        console.info(`✅ Solved via ${p.name}`);
+        return out;
+      }
+    } catch(e) {
+      console.warn(`⚠️ ${p.name} failed:`, e.message);
+    }
   }
-  throw new Error("All AI providers failed.\n\nCheck your internet connection.\nGroq key: console.groq.com\nOpenRouter key: openrouter.ai/keys");
+  throw new Error(
+    "All AI providers failed.\n\n" +
+    "Steps to fix:\n" +
+    "1. Get a fresh Groq key → console.groq.com\n" +
+    "2. Get a fresh OpenRouter key → openrouter.ai/keys\n" +
+    "3. Paste both at the top of script.js\n\n" +
+    "Check browser Console (F12) for detailed error logs."
+  );
 }
 
 function cleanAIResponse(t){
